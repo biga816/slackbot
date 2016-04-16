@@ -104,7 +104,7 @@ function getMsg(messages) {
  * (all message)
  * 各メッセージに対応したreplyをする
  */
-controller.hears([''], 'ambient', function(bot, message) {
+controller.hears([''], 'message_received', function(bot, message) {
   // 名前に反応する
   if (checkMsg(message, ['幸村', 'ゆきむら', 'ユキムラ', '真田', 'さなだ', 'サナダ'])) {
     var rtnMsg = '呼んだ？';
@@ -122,11 +122,54 @@ controller.hears([''], 'ambient', function(bot, message) {
   }
   // 依頼
   if (checkMsg(message, ['確認お願い', 'チェックお願い'])) {
-    var rtnMsg = 'プライオリティ高めで頼むよ！';
+    var rtnMsg = getMsg(['フルコミットで頼む！', 'プライオリティ高めで！', 'コンピテンシーあるねー']);
+    bot.reply(message, rtnMsg);
+  }
+  // 笑い
+  if (checkMsg(message, ['ww'])) {
+    var rtnMsg = 'ワロタwww';
     bot.reply(message, rtnMsg);
   }
 
 });
+
+/**
+ * totsuzen
+ * 突然死ジェネレーター
+ */
+controller.hears(['totsuzen'], 'direct_mention', function(bot, message) {
+
+  String.prototype.lengthByte = function() {
+    var c, i, j, r, ref, str;
+    str = this;
+    r = 0;
+    for (i = j = 0, ref = str.length - 1; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
+      c = str.charCodeAt(i);
+      if ((c >= 0x0 && c < 0x81) || (c === 0xf8f0) || (c >= 0xff61 && c < 0xffa0) || (c >= 0xf8f1 && c < 0xf8f4)) {
+        r += 1;
+      } else {
+        r += 2;
+      }
+    }
+    return r;
+  };
+
+  String.prototype.repeat = function(n) {
+    return new Array(n + 1).join(this);
+  };
+
+  var msgArray = message.text.split(" ");
+  if (msgArray.length > 1) {
+    var str = msgArray[1] + "！";
+    var len = Math.floor(str.lengthByte() / 2);
+    var rtnMsg = "";
+    rtnMsg += "＿" + ("人".repeat(len + 2)) + "＿\n";
+    rtnMsg += "＞　" + str + "　＜\n";
+    rtnMsg += "￣" + ("Ｙ".repeat(len + 2)) + "￣";
+    bot.reply(message, rtnMsg);
+  }
+});
+
 /**
  * hello
  * Helloと返す
