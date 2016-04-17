@@ -138,7 +138,7 @@ controller.hears([''], 'ambient', function(bot, message) {
  * 突然死ジェネレーター
  */
 controller.hears(['totsuzen'], 'direct_message,direct_mention,mention', function(bot, message) {
-  console.log("saaa");
+
   String.prototype.lengthByte = function() {
     var c, i, j, r, ref, str;
     str = this;
