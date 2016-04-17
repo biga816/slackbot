@@ -104,7 +104,7 @@ function getMsg(messages) {
  * (all message)
  * 各メッセージに対応したreplyをする
  */
-controller.hears([''], 'message_received', function(bot, message) {
+controller.hears([''], 'ambient', function(bot, message) {
   // 名前に反応する
   if (checkMsg(message, ['幸村', 'ゆきむら', 'ユキムラ', '真田', 'さなだ', 'サナダ'])) {
     var rtnMsg = '呼んだ？';
@@ -137,8 +137,8 @@ controller.hears([''], 'message_received', function(bot, message) {
  * totsuzen
  * 突然死ジェネレーター
  */
-controller.hears(['totsuzen'], 'direct_mention', function(bot, message) {
-
+controller.hears(['totsuzen'], 'direct_message,direct_mention,mention', function(bot, message) {
+  console.log("saaa");
   String.prototype.lengthByte = function() {
     var c, i, j, r, ref, str;
     str = this;
