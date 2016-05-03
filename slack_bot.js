@@ -146,9 +146,9 @@ controller.hears(['google'], 'direct_message,direct_mention,mention', function(b
     // リンク一覧を表示
     var rtnMsg = "";
     var count = 1;
-    $('.r').each(function (idx) {
-      rtnMsg += "【" + count + "】" + $(this).find('a').text() + "  ";
-      rtnMsg += $(this).find('a').attr('href') + "\n";
+    $('.g').each(function (idx) {
+      rtnMsg += "【" + count + "】" + $(this).find('h3').children('a').text() + "  ";
+      rtnMsg += $(this).find('h3').children('a').attr('href') + "\n";
       count += 1;
     });
     bot.reply(message, rtnMsg);
