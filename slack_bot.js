@@ -147,9 +147,12 @@ controller.hears(['google'], 'direct_message,direct_mention,mention', function(b
     var rtnMsg = "";
     var count = 1;
     $('.g').each(function (idx) {
-      rtnMsg += "【" + count + "】" + $(this).find('h3').children('a').text() + "  ";
-      rtnMsg += $(this).find('h3').children('a').attr('href') + "\n";
-      count += 1;
+      var target = $(this).find('h3').children('a').text();
+      if (target && count <= 5) {
+        rtnMsg += "【" + count + "】" + target + "  ";
+        rtnMsg += $(this).find('h3').children('a').attr('href') + "\n";
+        count += 1;
+      }
     });
     bot.reply(message, rtnMsg);
   });
