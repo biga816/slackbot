@@ -71,6 +71,7 @@ if (!process.env.token) {
 
 var Botkit = require('./lib/Botkit.js');
 var os = require('os');
+var client = require('cheerio-httpcli');
 
 var controller = Botkit.slackbot({
     debug: true,
@@ -131,6 +132,59 @@ controller.hears([''], 'ambient', function(bot, message) {
     bot.reply(message, rtnMsg);
   }
 
+});
+
+/**
+ * google
+ * Google検索
+ */
+controller.hears(['google'], 'direct_message,direct_mention,mention', function(bot, message) {
+  var msg = message.text.replace( /google\s/g , "" );
+
+  // Googleで「node.js」について検索する。
+  client.fetch('http://www.google.com/search', { q: msg }, function (err, $, res) {
+    // リンク一覧を表示
+    var rtnMsg = "";
+    var count = 1;
+    $('.r').each(function (idx) {
+      rtnMsg += "【" + count + "】" + $(this).find('a').text() + "  ";
+      rtnMsg += $(this).find('a').attr('href') + "\n";
+      count += 1;
+    });
+    bot.reply(message, rtnMsg);
+  });
+});
+
+
+/**
+ * 命日
+ * 今日が命日有名人を検索
+ */
+controller.hears(['命日'], 'direct_message,direct_mention,mention', function(bot, message) {
+  // 今日の日付を取得
+  var today = new Date();
+  var month = ("0" + (today.getMonth() + 1)).substr(-2);
+  var date = ("0" + today.getDate()).substr(-2);
+  // Googleで「node.js」について検索する。
+  client.fetch('http://www.d4.dion.ne.jp/~warapon/data04/death-'+month+date+'.htm', function (err, $, res) {
+
+    var rtnMsg = "";
+    var names = [];
+    var briefs = [];
+
+    // リンク一覧を表示
+    $('#total-box').find('p').each(function (idx) {
+      names.push($(this).children('span:first-child').text());
+      briefs.push($(this).text());
+    })
+    // ランダム変数
+    i = Math.floor(Math.random() * names.length)
+    // メッセージ作成
+    rtnMsg = "今日は" + names[i] + "の命日だぞ！" + "\n";
+    rtnMsg += ">" + briefs[i]
+
+    bot.reply(message, rtnMsg);
+  });
 });
 
 /**
