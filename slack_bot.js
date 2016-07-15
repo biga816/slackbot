@@ -72,14 +72,16 @@ if (!process.env.token) {
 var Botkit = require('./lib/Botkit.js');
 var os = require('os');
 var client = require('cheerio-httpcli');
+var CronJob = require('cron').CronJob;
 
 var controller = Botkit.slackbot({
-    debug: true,
+    debug: false,
 });
 
 var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
+
 
 /**
  * 共通処理
@@ -100,6 +102,7 @@ function getMsg(messages) {
   var rand = Math.floor( Math.random() * messages.length );
   return messages[rand];
 }
+
 
 /**
  * (all message)
@@ -134,6 +137,7 @@ controller.hears([''], 'ambient', function(bot, message) {
 
 });
 
+
 /**
  * google
  * Google検索
@@ -158,37 +162,6 @@ controller.hears(['google'], 'direct_message,direct_mention,mention', function(b
   });
 });
 
-
-/**
- * 命日
- * 今日が命日有名人を検索
- */
-controller.hears(['命日'], 'direct_message,direct_mention,mention', function(bot, message) {
-  // 今日の日付を取得
-  var today = new Date();
-  var month = ("0" + (today.getMonth() + 1)).substr(-2);
-  var date = ("0" + today.getDate()).substr(-2);
-  // Googleで「node.js」について検索する。
-  client.fetch('http://www.d4.dion.ne.jp/~warapon/data04/death-'+month+date+'.htm', function (err, $, res) {
-
-    var rtnMsg = "";
-    var names = [];
-    var briefs = [];
-
-    // リンク一覧を表示
-    $('#total-box').find('p').each(function (idx) {
-      names.push($(this).children('span:first-child').text());
-      briefs.push($(this).text());
-    })
-    // ランダム変数
-    i = Math.floor(Math.random() * names.length)
-    // メッセージ作成
-    rtnMsg = "今日は" + names[i] + "の命日だぞ！" + "\n";
-    rtnMsg += ">" + briefs[i]
-
-    bot.reply(message, rtnMsg);
-  });
-});
 
 /**
  * totsuzen
@@ -227,6 +200,7 @@ controller.hears(['totsuzen'], 'direct_message,direct_mention,mention', function
   }
 });
 
+
 /**
  * hello
  * Helloと返す
@@ -252,6 +226,7 @@ controller.hears(['hello', 'hi', 'やあ', 'やぁ', 'おっす', 'オッス'], 
     });
 });
 
+
 /**
  * call me
  * 自分の名前を設定する
@@ -270,6 +245,7 @@ controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_men
         });
     });
 });
+
 
 /**
  * what is my name
@@ -343,6 +319,7 @@ controller.hears(['what is my name', 'who am i'], 'direct_message,direct_mention
     });
 });
 
+
 /**
  * shutdown
  * botをシャットダウンする
@@ -373,6 +350,7 @@ controller.hears(['shutdown'], 'direct_message,direct_mention,mention', function
         ]);
     });
 });
+
 
 /**
  * uptime
@@ -407,3 +385,67 @@ function formatUptime(uptime) {
     uptime = uptime + ' ' + unit;
     return uptime;
 }
+
+
+/**
+ * cron
+ * 定期処理を実行する
+ */
+var cron = new CronJob({
+  cronTime: '00 9 * * *', // 毎日9時に実行
+  onTick: function() {
+
+    // 今日の日付を取得
+    var today = new Date();
+    var month = ("0" + (today.getMonth() + 1)).substr(-2);
+    var date = ("0" + today.getDate()).substr(-2);
+    // Googleで「node.js」について検索する。
+    client.fetch('http://www.d4.dion.ne.jp/~warapon/data04/death-'+month+date+'.htm', function (err, $, res) {
+
+        var rtnMsg = "";
+        var names = [];
+        var birth = [];
+        var briefs = [];
+
+        // 名称一覧を取得
+        $('#total-box').find('dd.hu1, dd.hu2, dd.hu3').each(function (idx) {
+        names.push($(this).text());
+        })
+        // 誕生日一覧を取得
+        $('#total-box').find('dt').each(function (idx) {
+        birth.push($(this).text());
+        })
+        // 誕生日一覧を取得
+        $('#total-box').find('dd.pf').each(function (idx) {
+        briefs.push($(this).text());
+        })
+
+        // ランダム変数
+        i = Math.floor(Math.random() * names.length)
+        // メッセージ作成
+        rtnMsg = "おっす、おらユキムラ！\n";
+        rtnMsg += "今日は" + names[i] + "の命日だぞ！" + "\n";
+        rtnMsg += ">" + briefs[i] + "\n";
+        rtnMsg += ">" + birth[i];
+
+
+        // botが発言する
+        bot.say({
+        // channel: 'C0F9390F5', // rekishoku: test
+        channel: 'C0G2LMW59', // team-rekishoku: general
+        text: rtnMsg,
+        as_user: true,
+        link_names: 1
+        }, function(err) {
+        if (err) {
+            bot.botkit.log(err);
+        }
+        });
+
+    });
+
+  },
+  start: false,
+  timeZone: 'Asia/Tokyo'
+});
+cron.start();
