@@ -432,7 +432,7 @@ var cron = new CronJob({
         // botが発言する
         bot.say({
         // channel: 'C0F9390F5', // rekishoku: test
-        channel: 'C0G2LMW59', // team-rekishoku: general
+        channel: process.env.CHANNEL_ID,
         text: rtnMsg,
         as_user: true,
         link_names: 1
