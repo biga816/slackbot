@@ -450,13 +450,13 @@ var cron = new CronJob({
         })
 
         // ランダム変数
-        i = Math.floor(Math.random() * names.length)
+        randomIdx = Math.floor(Math.random() * Math.random() * names.length);
+        let idx = randomIdx === names.length ? randomIdx - 1 : randomIdx;
         // メッセージ作成
         rtnMsg = "おっす、おらユキムラ！\n";
-        rtnMsg += "今日は" + names[i] + "の命日だぞ！" + "\n";
-        rtnMsg += ">" + briefs[i] + "\n";
-        rtnMsg += ">" + birth[i];
-
+        rtnMsg += "今日は" + names[idx] + "の命日だぞ！" + "\n";
+        rtnMsg += ">" + briefs[idx] + "\n";
+        rtnMsg += ">" + birth[idx];
 
         // botが発言する
         bot.say({
