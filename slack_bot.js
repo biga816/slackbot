@@ -85,7 +85,10 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
+var talkContext = null;
+
 const talkApiKey = process.env.talkApiKey;
+const taklApiUrl = 'https://api.apigw.smt.docomo.ne.jp/dialogue/v1/dialogue';
 
 /**
  * 共通処理
@@ -396,17 +399,16 @@ function formatUptime(uptime) {
  * Call Talk API
  */
 controller.hears([''], 'direct_message,direct_mention,mention', function(bot, message) {
-    var params = qs.stringify({
-        'apikey': talkApiKey,
-        'query': message.text
-    })
+    var params = {
+        utt: message.text,
+        context: talkContext,
+        t: 20
+    };
 
-    axios.post('https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk', params)
+    axios.post(taklApiUrl + '?APIKEY=' + talkApiKey, params)
     .then(function (response) {
-        let results = response ? response.data.results : [];
-        results.forEach((result) => {
-            bot.reply(message, result.reply);
-        })
+        talkContext = response.data.context;
+        bot.reply(message, response.data.utt);
     })
     .catch(function (error) {
         let rtnMsg = 'エラーだぞ！';
