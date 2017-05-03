@@ -69,10 +69,13 @@ if (!process.env.token) {
     process.exit(1);
 }
 
-var Botkit = require('./lib/Botkit.js');
-var os = require('os');
-var client = require('cheerio-httpcli');
-var CronJob = require('cron').CronJob;
+const Botkit = require('./lib/Botkit.js');
+const os = require('os');
+const client = require('cheerio-httpcli');
+const CronJob = require('cron').CronJob;
+const axios = require('axios')
+const qs = require('qs');
+
 
 var controller = Botkit.slackbot({
     debug: false,
@@ -82,6 +85,7 @@ var bot = controller.spawn({
     token: process.env.token
 }).startRTM();
 
+const talkApiKey = process.env.talkApiKey;
 
 /**
  * 共通処理
@@ -385,6 +389,31 @@ function formatUptime(uptime) {
     uptime = uptime + ' ' + unit;
     return uptime;
 }
+
+
+/**
+ * chat
+ * Call Talk API
+ */
+controller.hears([''], 'direct_message,direct_mention,mention', function(bot, message) {
+    var params = qs.stringify({
+        'apikey': talkApiKey,
+        'query': message.text
+    })
+
+    axios.post('https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk', params)
+    .then(function (response) {
+        let results = response ? response.data.results : [];
+        results.forEach((result) => {
+            bot.reply(message, result.reply);
+        })
+    })
+    .catch(function (error) {
+        let rtnMsg = 'エラーだぞ！';
+        bot.reply(message, rtnMsg);
+    });
+
+});
 
 
 /**
